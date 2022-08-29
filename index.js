@@ -47,3 +47,71 @@ db_connection.on("error", (err) => {
   console.log("--- ERROR ---");
   console.log(err);
 });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+const names = ["Nebyu", "Gizaw", "Adane"];
+
+// Our first endpoint
+app.get("/names", (req, res, next) => {
+  res.json({
+    names: names,
+  });
+});
+
+const check = (req, res, next) => {
+  const id = req.params.id;
+  if (!names[id]) {
+    return res.json({
+      message: "User does not exists",
+    });
+  }
+  next();
+};
+
+const getSingleUser = (req, res, next) => {
+  res.json({
+    user: names[req.params.id],
+  });
+};
+
+app.get("/names/:id", check, getSingleUser);
+
+// Add names to the array
+app.post("/names", (req, res, next) => {
+  const name = req.body.name;
+
+  names.push(name);
+
+  res.json({
+    names: names,
+  });
+});
+
+app.patch("/names/:id", (req, res, next) => {
+  const name = req.body.name;
+  const id = req.params.id;
+  names[id] = name;
+  res.json({
+    names: names,
+  });
+});
+
+app.delete("/names/:id", (req, res, next) => {
+  const id = req.params.id;
+  names.splice(id, 1);
+  res.json({
+    names: names,
+  });
+});
+
+// Handle urls which don't exist
+app.use("*", (req, res, next) => {
+  res.json({
+    status: "FAIL",
+    message: `Unknown URL - ${req.protocol}://${req.get("host")}${
+      req.originalUrl
+    }`,
+  });
+});
