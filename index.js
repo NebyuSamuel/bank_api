@@ -7,10 +7,6 @@ const express = require("express");
 // Global application
 const app = express();
 
-// Dotenv
-const dotenv = require("dotenv");
-dotenv.config({ path: "./config.env" });
-
 // Mongoose
 const mongoose = require("mongoose");
 
@@ -20,6 +16,15 @@ const server = http.createServer(app);
 // Port
 const port = process.env.PORT || 3000;
 
+// Configs
+const configs = require("./configs");
+
+// geh
+const geh = require("./geh");
+
+// App Error
+const AppError = require("./appError");
+
 // Listen on the server
 server.listen(port, () => {
   console.log(`Listening on ${port}...`);
@@ -27,7 +32,7 @@ server.listen(port, () => {
 
 // Connect to DB
 mongoose
-  .connect(process.env.DATABASE_REMOTE)
+  .connect(configs.db.remote)
   .then(() => {
     console.log(`Connected successfully`);
   })
@@ -53,10 +58,13 @@ app.use(express.urlencoded({ extended: false }));
 
 // Handle urls which don't exist
 app.use("*", (req, res, next) => {
-  res.json({
-    status: "FAIL",
-    message: `Unknown URL - ${req.protocol}://${req.get("host")}${
-      req.originalUrl
-    }`,
-  });
+  return next(
+    new AppError(
+      `Unknown URL - ${req.protocol}://${req.get("host")}${req.originalUrl}`,
+      404
+    )
+  );
 });
+
+// Use my geh
+app.use(geh);
