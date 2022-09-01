@@ -12,10 +12,14 @@ router
   .get(userController.getAllUserAccounts)
   .post(userController.createUserAccount);
 
+router.get("/active", userController.getActiveAccounts);
+
 router
   .route("/:id")
   .get(userController.getSingleUserAccount)
   .patch(userController.updateUserProfile);
+
+router.patch("/:id/status", userController.updateUserAccountStatus);
 
 // Export router
 module.exports = router;
