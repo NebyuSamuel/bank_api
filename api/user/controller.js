@@ -60,6 +60,27 @@ exports.getAllUserAccounts = async (req, res, next) => {
   }
 };
 
+// Get active accounts only
+exports.getActiveAccounts = async (req, res, next) => {
+  try {
+    // Get all active accounts
+    const users = await User.find({ status: "Active" })
+      .sort("firstName")
+      .lean();
+
+    // Respond
+    res.status(200).json({
+      status: "SUCCESSS",
+      results: users.length,
+      data: {
+        users,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Get a single user account
 exports.getSingleUserAccount = async (req, res, next) => {
   try {
@@ -117,6 +138,46 @@ exports.updateUserProfile = async (req, res, next) => {
         user,
       },
       message: `${user.firstName} ${user.lastName}'s profile successfully updated`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Update user account status
+exports.updateUserAccountStatus = async (req, res, next) => {
+  try {
+    // Get user
+    const getUser = await User.findById(req.params.id);
+
+    // Check if there is a user with the specified id
+    if (!getUser)
+      return next(new AppError("There is no user with this id", 404));
+
+    // Status
+    let status = "";
+
+    // Set status
+    if (getUser.status === "Active") {
+      status = "Inactive";
+    } else if (getUser.status === "Inactive") {
+      status = "Active";
+    }
+
+    // Update user status
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { runValidators: true, new: true }
+    );
+
+    // Respond
+    res.status(200).json({
+      status: "SUCCESS",
+      data: {
+        user,
+      },
+      message: `${user.firstName} ${user.lastName}'s account status changed from ${getUser.status} to ${user.status}`,
     });
   } catch (error) {
     next(error);
