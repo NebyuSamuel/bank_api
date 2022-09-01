@@ -25,6 +25,9 @@ const geh = require("./geh");
 // App Error
 const AppError = require("./appError");
 
+// User Router
+const userRouter = require("./api/user/router");
+
 // Listen on the server
 server.listen(port, () => {
   console.log(`Listening on ${port}...`);
@@ -55,6 +58,8 @@ db_connection.on("error", (err) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use("/api/v1/users", userRouter);
 
 // Handle urls which don't exist
 app.use("*", (req, res, next) => {
