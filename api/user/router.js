@@ -12,7 +12,10 @@ router
   .get(userController.getAllUserAccounts)
   .post(userController.createUserAccount);
 
-router.route("/:id").get(userController.getSingleUserAccount);
+router
+  .route("/:id")
+  .get(userController.getSingleUserAccount)
+  .patch(userController.updateUserProfile);
 
 // Export router
 module.exports = router;
