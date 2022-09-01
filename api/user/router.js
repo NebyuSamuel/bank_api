@@ -10,14 +10,16 @@ const userController = require("./controller");
 router
   .route("/")
   .get(userController.getAllUserAccounts)
-  .post(userController.createUserAccount);
+  .post(userController.createUserAccount)
+  .delete(userController.deleteAllUsers);
 
 router.get("/active", userController.getActiveAccounts);
 
 router
   .route("/:id")
   .get(userController.getSingleUserAccount)
-  .patch(userController.updateUserProfile);
+  .patch(userController.updateUserProfile)
+  .delete(userController.deleteSingleUser);
 
 router.patch("/:id/status", userController.updateUserAccountStatus);
 

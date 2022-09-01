@@ -183,3 +183,42 @@ exports.updateUserAccountStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+// Delete a single user account
+exports.deleteSingleUser = async (req, res, next) => {
+  try {
+    // Get user
+    const getUser = await User.findById(req.params.id);
+
+    // Check if there is a user with the specified id
+    if (!getUser)
+      return next(new AppError("There is no user with this id", 404));
+
+    // Delete a single user
+    await User.findByIdAndDelete(req.params.id);
+
+    // Respond
+    res.status(200).json({
+      status: "SUCCESS",
+      message: "User account succesfully removed",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete all users
+exports.deleteAllUsers = async (req, res, next) => {
+  try {
+    // Delete all user by your own risk
+    await User.deleteMany({});
+
+    // Respond
+    res.status(200).json({
+      status: "SUCCESS",
+      message: "All user accounts are deleted",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
