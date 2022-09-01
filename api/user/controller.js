@@ -80,3 +80,45 @@ exports.getSingleUserAccount = async (req, res, next) => {
     next(error);
   }
 };
+
+// Update user profile
+exports.updateUserProfile = async (req, res, next) => {
+  try {
+    // Get user
+    const getUser = await User.findById(req.params.id);
+
+    // Check if there is a user with the specified id
+    if (!getUser)
+      return next(new AppError("There is no user with this id", 404));
+
+    // Get body
+    const { firstName, lastName } = req.body;
+
+    // Check if there are other body inputs like status, email or phone number
+    if (req.body.email || req.body.phoneNumber || req.body.status)
+      return next(
+        new AppError(
+          "You can not use this endpoint for updating email or phone number or status",
+          400
+        )
+      );
+
+    // Update user profile
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { firstName, lastName },
+      { runValidators: true, new: true }
+    );
+
+    // Respond
+    res.status(200).json({
+      status: "SUCCESS",
+      data: {
+        user,
+      },
+      message: `${user.firstName} ${user.lastName}'s profile successfully updated`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

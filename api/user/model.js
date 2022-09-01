@@ -30,6 +30,7 @@ const userSchema = new mongoose.Schema(
         validator: validator.isEmail,
         message: "Invalid email address",
       },
+      unique: true,
     },
     status: {
       type: String,
