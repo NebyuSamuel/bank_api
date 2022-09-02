@@ -13,7 +13,6 @@ const accountSchema = new mongoose.Schema(
     },
     branch: {
       type: mongoose.Schema.ObjectId,
-      ref: "Branch",
       required: [true, "Branch of the company is required"],
     },
     initialDepoist: {

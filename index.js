@@ -28,6 +28,9 @@ const AppError = require("./appError");
 // User Router
 const userRouter = require("./api/user/router");
 
+// Branch router
+const branchRouter = require("./api/branch/router");
+
 // Listen on the server
 server.listen(port, () => {
   console.log(`Listening on ${port}...`);
@@ -60,6 +63,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/branches", branchRouter);
 
 // Handle urls which don't exist
 app.use("*", (req, res, next) => {
