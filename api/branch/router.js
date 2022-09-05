@@ -15,7 +15,8 @@ router
 router
   .route("/:id")
   .get(branchController.getSingleBranch)
-  .patch(branchController.updateBranch);
+  .patch(branchController.updateBranch)
+  .delete(branchController.deleteSingleBranch);
 
 router.patch("/:id/branchcode", branchController.updateBranchCode);
 

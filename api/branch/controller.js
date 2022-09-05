@@ -1,6 +1,9 @@
 // Branch
 const Branch = require("./model");
 
+// Account
+const Account = require("../account/model");
+
 // App Error
 const AppError = require("../../appError");
 
@@ -152,6 +155,59 @@ exports.updateBranchCode = async (req, res, next) => {
         branch,
       },
       message: "Branch code successfully created",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete a single branch
+exports.deleteSingleBranch = async (req, res, next) => {
+  try {
+    // Get a single branch using the id
+    const getBranch = await Branch.findById(req.params.id);
+
+    // Check if there is a branch with the specified id
+    if (!getBranch)
+      return next(new AppError("There is no branch with this id", 400));
+
+    // Get body
+    const { replacementBranch } = req.body;
+
+    // Message
+    let message = "Branch successfully deleted";
+
+    // Check if there is a transfer or replacement branch
+    const accounts = await Account.find({ branch: getBranch._id });
+    if (accounts.length !== 0) {
+      if (!replacementBranch)
+        return next(
+          new AppError(
+            "You should provide a replacement branch for the accounts that are using this branch",
+            400
+          )
+        );
+      // Update branch
+      await Account.updateMany(
+        { branch: getBranch._id },
+        { branch: replacementBranch }
+      );
+
+      // Delete branch
+      await Branch.findByIdAndDelete(req.params.id);
+
+      // Message
+      message =
+        "Branch successfully deleted. Accounts using this branch are also successfully transferred.";
+    } else {
+      // Delete branch for accounts which do not have this branch
+      await Branch.findByIdAndDelete(req.params.id);
+    }
+
+    // Respond
+    res.status(200).json({
+      status: "SUCCES",
+      message,
     });
   } catch (error) {
     next(error);

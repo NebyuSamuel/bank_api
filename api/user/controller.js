@@ -1,6 +1,12 @@
 // User Model
 const User = require("./model");
 
+// Account
+const Account = require("../account/model");
+
+// Backup
+const Backup = require("../user-backup/model");
+
 // App Error
 const AppError = require("../../appError");
 
@@ -154,22 +160,39 @@ exports.updateUserAccountStatus = async (req, res, next) => {
     if (!getUser)
       return next(new AppError("There is no user with this id", 404));
 
+    // Get user account
+    const getAccount = await Account.findOne({ user: getUser._id });
+    if (!getAccount)
+      return next(new AppError("This user does not have an account", 400));
+
     // Status
     let status = "";
+
+    // user
+    let user = "";
 
     // Set status
     if (getUser.status === "Active") {
       status = "Inactive";
+
+      // Update user status
+      user = await User.findByIdAndUpdate(
+        req.params.id,
+        { status },
+        { runValidators: true, new: true }
+      );
+
+      // Update accounts status
+      await Account.updateMany({ user: getUser._id }, { status });
     } else if (getUser.status === "Inactive") {
       status = "Active";
+      // Update user status
+      user = await User.findByIdAndUpdate(
+        req.params.id,
+        { status },
+        { runValidators: true, new: true }
+      );
     }
-
-    // Update user status
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { runValidators: true, new: true }
-    );
 
     // Respond
     res.status(200).json({
@@ -197,6 +220,18 @@ exports.deleteSingleUser = async (req, res, next) => {
     // Delete a single user
     await User.findByIdAndDelete(req.params.id);
 
+    // Delete accounts
+    await Account.deleteMany({ user: getUser._id });
+
+    // Back up deleted user
+    await Backup.create({
+      firstName: getUser.firstName,
+      lastName: getUser.lastName,
+      email: getUser.email,
+      phoneNumber: getUser.phoneNumber,
+      status: getUser.status,
+    });
+
     // Respond
     res.status(200).json({
       status: "SUCCESS",
@@ -210,8 +245,24 @@ exports.deleteSingleUser = async (req, res, next) => {
 // Delete all users
 exports.deleteAllUsers = async (req, res, next) => {
   try {
+    // Get all users
+    const users = await User.find().lean();
+
     // Delete all user by your own risk
     await User.deleteMany({});
+
+    // Delete all accounts
+    await Account.deleteMany({});
+
+    users.forEach(async (user) => {
+      await Backup.create({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        status: user.status,
+      });
+    });
 
     // Respond
     res.status(200).json({
