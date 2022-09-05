@@ -4,8 +4,8 @@ const mongoose = require("mongoose");
 // Validator
 const validator = require("validator");
 
-// User Schema
-const userSchema = new mongoose.Schema(
+// User Backup Schema
+const backupSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -34,11 +34,7 @@ const userSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      default: "Active",
-      enum: {
-        values: ["Active", "Inactive"],
-        message: "Unknown or Invalid user account status",
-      },
+      required: [true, "Status is required"],
     },
   },
   {
@@ -47,11 +43,17 @@ const userSchema = new mongoose.Schema(
       w: "majority",
       j: true,
     },
+    toJSON: {
+      virtuals: true,
+    },
+    toObject: {
+      virtuals: true,
+    },
   }
 );
 
-// User Model
-const User = mongoose.model("User", userSchema);
+// UserBackup Model
+const Backup = mongoose.model("Backup", backupSchema);
 
-// Export User Model
-module.exports = User;
+// Export User Backup Model
+module.exports = Backup;

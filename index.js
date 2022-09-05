@@ -31,6 +31,9 @@ const userRouter = require("./api/user/router");
 // Branch router
 const branchRouter = require("./api/branch/router");
 
+// Account router
+const accountRouter = require("./api/account/router");
+
 // Listen on the server
 server.listen(port, () => {
   console.log(`Listening on ${port}...`);
@@ -64,6 +67,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/branches", branchRouter);
+app.use("/api/v1/accounts", accountRouter);
 
 // Handle urls which don't exist
 app.use("*", (req, res, next) => {
